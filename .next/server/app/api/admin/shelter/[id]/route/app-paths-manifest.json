@@ -1,0 +1,3 @@
+{
+  "/api/admin/shelter/[id]/route": "app/api/admin/shelter/[id]/route.js"
+}

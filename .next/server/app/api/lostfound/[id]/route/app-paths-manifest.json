@@ -1,0 +1,3 @@
+{
+  "/api/lostfound/[id]/route": "app/api/lostfound/[id]/route.js"
+}

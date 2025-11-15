@@ -29,11 +29,32 @@ export default function SignUpPage() {
       return
     }
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Store tokens in localStorage
+        localStorage.setItem('accessToken', result.data.accessToken)
+        localStorage.setItem('refreshToken', result.data.refreshToken)
+        localStorage.setItem('user', JSON.stringify(result.data))
+        router.push('/dashboard')
+      } else {
+        alert(result.message || 'Registration failed')
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      alert('Registration failed. Please try again.')
+    } finally {
       setIsLoading(false)
-      router.push('/dashboard')
-    }, 1000)
+    }
   }
 
   return (

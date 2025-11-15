@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X, Heart, User } from 'lucide-react'
 import { GradientButton } from '@/components/ui/gradient-button'
@@ -8,11 +8,29 @@ import { SignOutButton } from '@/components/ui/sign-out-button'
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false) // Mock auth state
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-  const handleSignOut = () => {
-    setIsLoggedIn(false)
-    // Handle sign out logic
+  // Check if user is logged in on component mount
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    setIsLoggedIn(!!token)
+  }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+      })
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      // Clear localStorage regardless of API call success
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+      setIsLoggedIn(false)
+      window.location.href = '/'
+    }
   }
 
   const navItems = [

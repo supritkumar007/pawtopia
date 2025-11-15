@@ -16,11 +16,32 @@ export default function SignInPage() {
 
   const handleSubmit = async (data: any) => {
     setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Store tokens in localStorage
+        localStorage.setItem('accessToken', result.data.accessToken)
+        localStorage.setItem('refreshToken', result.data.refreshToken)
+        localStorage.setItem('user', JSON.stringify(result.data))
+        router.push('/dashboard')
+      } else {
+        alert(result.message || 'Login failed')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      alert('Login failed. Please try again.')
+    } finally {
       setIsLoading(false)
-      router.push('/dashboard')
-    }, 1000)
+    }
   }
 
   return (
