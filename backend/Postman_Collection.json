@@ -1,0 +1,557 @@
+{
+  "info": {
+    "name": "Pet Adoption Backend API",
+    "description": "Complete API collection for Pet Adoption Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@test.com\",\n  \"phone\": \"9876543210\",\n  \"password\": \"test123\",\n  \"location\": {\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Login successful\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"accessToken\", jsonData.data.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@test.com\",\n  \"password\": \"test123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pets",
+      "item": [
+        {
+          "name": "Get All Available Pets",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pets",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets"]
+            }
+          }
+        },
+        {
+          "name": "Get Pet by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pets/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Create Pet (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Buddy\",\n  \"type\": \"Dog\",\n  \"breed\": \"Labrador\",\n  \"ageYears\": 2,\n  \"ageMonths\": 6,\n  \"gender\": \"Male\",\n  \"size\": \"Large\",\n  \"temperament\": [\"Friendly\", \"Playful\"],\n  \"vaccinated\": true,\n  \"sterilized\": true,\n  \"description\": \"Friendly dog looking for a loving home\",\n  \"adoptionFee\": 5000,\n  \"images\": [\"https://example.com/dog1.jpg\"],\n  \"status\": \"available\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pets",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets"]
+            }
+          }
+        },
+        {
+          "name": "Update Pet (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"adopted\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pets/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", ":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Pet (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pets/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["pets", ":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Adoption",
+      "item": [
+        {
+          "name": "Apply for Adoption",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": \"PET_ID_HERE\",\n  \"questionnaire\": {\n    \"hasExperience\": true,\n    \"hasYard\": false,\n    \"familyMembers\": 3,\n    \"otherPets\": [],\n    \"reason\": \"Want a companion for my family\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/adoption/apply",
+              "host": ["{{baseUrl}}"],
+              "path": ["adoption", "apply"]
+            }
+          }
+        },
+        {
+          "name": "Get My Adoptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adoption/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["adoption", "my"]
+            }
+          }
+        },
+        {
+          "name": "Get All Adoptions (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adoption/admin/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["adoption", "admin", "all"]
+            }
+          }
+        },
+        {
+          "name": "Approve Adoption (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adoption/:id/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["adoption", ":id", "approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Adoption (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/adoption/:id/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["adoption", ":id", "reject"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favorites",
+      "item": [
+        {
+          "name": "Add to Favorites",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": \"PET_ID_HERE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/favorites/add",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "add"]
+            }
+          }
+        },
+        {
+          "name": "Remove from Favorites",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"petId\": \"PET_ID_HERE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/favorites/remove",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "remove"]
+            }
+          }
+        },
+        {
+          "name": "Get My Favorites",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "my"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/profile/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["profile", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"phone\": \"9999999999\",\n  \"location\": {\n    \"city\": \"Delhi\",\n    \"state\": \"Delhi\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/profile/update",
+              "host": ["{{baseUrl}}"],
+              "path": ["profile", "update"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Lost & Found",
+      "item": [
+        {
+          "name": "Create Lost/Found Post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"lost\",\n  \"petName\": \"Charlie\",\n  \"description\": \"Brown dog with white collar\",\n  \"lastSeenLocation\": \"Andheri West, Mumbai\",\n  \"images\": [\"https://example.com/pet.jpg\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lostfound/post",
+              "host": ["{{baseUrl}}"],
+              "path": ["lostfound", "post"]
+            }
+          }
+        },
+        {
+          "name": "Get Lost Pets",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lostfound/lost",
+              "host": ["{{baseUrl}}"],
+              "path": ["lostfound", "lost"]
+            }
+          }
+        },
+        {
+          "name": "Get Found Pets",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lostfound/found",
+              "host": ["{{baseUrl}}"],
+              "path": ["lostfound", "found"]
+            }
+          }
+        },
+        {
+          "name": "Get My Posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lostfound/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["lostfound", "my"]
+            }
+          }
+        },
+        {
+          "name": "Mark as Resolved",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lostfound/:id/resolve",
+              "host": ["{{baseUrl}}"],
+              "path": ["lostfound", ":id", "resolve"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Create Shelter",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Happy Paws Shelter\",\n  \"description\": \"A loving shelter for abandoned pets\",\n  \"address\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400001\"\n  },\n  \"phone\": \"9876543210\",\n  \"email\": \"info@happypaws.com\",\n  \"capacity\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/shelter",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "shelter"]
+            }
+          }
+        },
+        {
+          "name": "Get All Shelters",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/shelters",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "shelters"]
+            }
+          }
+        },
+        {
+          "name": "Create Blog",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"10 Tips for New Pet Owners\",\n  \"content\": \"Full blog content here...\",\n  \"category\": \"Tips\",\n  \"tags\": [\"tips\", \"newowners\"],\n  \"published\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/blog",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "blog"]
+            }
+          }
+        },
+        {
+          "name": "Get All Blogs",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/blogs",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "blogs"]
+            }
+          }
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
