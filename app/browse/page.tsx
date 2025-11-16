@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Search, MapPin, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
@@ -11,6 +11,24 @@ import { PetCardSkeleton } from '@/components/ui/skeleton-loader'
 import { EmptyState } from '@/components/ui/empty-state'
 import { FilterSidebar } from '@/components/pet/filter-sidebar'
 
+interface Pet {
+  _id: string
+  name: string
+  type: string
+  breed: string
+  ageYears: number
+  ageMonths: number
+  gender: string
+  size: string
+  vaccinated: boolean
+  sterilized: boolean
+  description: string
+  adoptionFee: number
+  images: string[]
+  status: string
+  createdAt: string
+}
+
 export default function BrowsePetsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFilters, setSelectedFilters] = useState<Record<string, any>>({})
@@ -18,23 +36,35 @@ export default function BrowsePetsPage() {
   const [sortBy, setSortBy] = useState('newest')
   const [currentPage, setCurrentPage] = useState(1)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [allPets, setAllPets] = useState<Pet[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  // Mock data
-  const allPets = [
-    { id: '1', name: 'Luna', breed: 'Golden Retriever', age: '2', species: 'Dog', size: 'Large', vaccinated: true, image: '/placeholder.svg?key=2uq53' },
-    { id: '2', name: 'Milo', breed: 'Tabby Cat', age: '1', species: 'Cat', size: 'Small', vaccinated: true, image: '/placeholder.svg?key=4l0rb' },
-    { id: '3', name: 'Max', breed: 'Husky Mix', age: '3', species: 'Dog', size: 'Large', vaccinated: true, image: '/placeholder.svg?key=o3rp0' },
-    { id: '4', name: 'Bella', breed: 'Siamese', age: '2', species: 'Cat', size: 'Small', vaccinated: false, image: '/placeholder.svg?key=8k2q1' },
-    { id: '5', name: 'Charlie', breed: 'Beagle', age: '1', species: 'Dog', size: 'Medium', vaccinated: true, image: '/placeholder.svg?key=9l4r2' },
-    { id: '6', name: 'Daisy', breed: 'Poodle', age: '4', species: 'Dog', size: 'Small', vaccinated: true, image: '/placeholder.svg?key=5m8s3' },
-    { id: '7', name: 'Oliver', breed: 'Rabbit', age: '1', species: 'Rabbit', size: 'Small', vaccinated: false, image: '/placeholder.svg?key=3n9t4' },
-    { id: '8', name: 'Sophie', breed: 'Persian', age: '3', species: 'Cat', size: 'Medium', vaccinated: true, image: '/placeholder.svg?key=7p1u5' },
-    { id: '9', name: 'Rocky', breed: 'German Shepherd', age: '5', species: 'Dog', size: 'Extra Large', vaccinated: true, image: '/placeholder.svg?key=2q5v6' },
-    { id: '10', name: 'Lucy', breed: 'Cocker Spaniel', age: '2', species: 'Dog', size: 'Medium', vaccinated: true, image: '/placeholder.svg?key=4r7w7' },
-    { id: '11', name: 'Oscar', breed: 'British Shorthair', age: '2', species: 'Cat', size: 'Medium', vaccinated: true, image: '/placeholder.svg?key=6s9x8' },
-    { id: '12', name: 'Coco', breed: 'Pomeranian', age: '1', species: 'Dog', size: 'Small', vaccinated: true, image: '/placeholder.svg?key=8t2y9' },
-  ]
+  // Fetch pets from API
+  useEffect(() => {
+    const fetchPets = async () => {
+      try {
+        setIsLoading(true)
+        const response = await fetch('/api/pets')
+        if (!response.ok) {
+          throw new Error('Failed to fetch pets')
+        }
+        const data = await response.json()
+        if (data.success) {
+          setAllPets(data.data)
+        } else {
+          throw new Error(data.message || 'Failed to fetch pets')
+        }
+      } catch (err) {
+        console.error('Error fetching pets:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch pets')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPets()
+  }, [])
 
   const itemsPerPage = 12
 
@@ -52,7 +82,7 @@ export default function BrowsePetsPage() {
 
     // Category filters
     if (selectedFilters.species?.length > 0) {
-      result = result.filter(pet => selectedFilters.species.includes(pet.species))
+      result = result.filter(pet => selectedFilters.species.includes(pet.type))
     }
     if (selectedFilters.size?.length > 0) {
       result = result.filter(pet => selectedFilters.size.includes(pet.size))
@@ -69,7 +99,7 @@ export default function BrowsePetsPage() {
 
     // Sort
     if (sortBy === 'newest') {
-      result.sort(() => Math.random() - 0.5)
+      result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     } else if (sortBy === 'name-asc') {
       result.sort((a, b) => a.name.localeCompare(b.name))
     } else if (sortBy === 'name-desc') {
@@ -77,7 +107,7 @@ export default function BrowsePetsPage() {
     }
 
     return result
-  }, [searchQuery, selectedFilters, sortBy])
+  }, [searchQuery, selectedFilters, sortBy, allPets])
 
   const paginatedPets = filteredPets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
   const totalPages = Math.ceil(filteredPets.length / itemsPerPage)
@@ -199,10 +229,14 @@ export default function BrowsePetsPage() {
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     {paginatedPets.map((pet, index) => (
-                      <div key={pet.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.05}s` }}>
+                      <div key={pet._id} className="animate-slide-up" style={{ animationDelay: `${index * 0.05}s` }}>
                         <PetCard
-                          {...pet}
-                          isFavorited={favorites.has(pet.id)}
+                          id={pet._id}
+                          name={pet.name}
+                          breed={pet.breed}
+                          age={`${pet.ageYears}y ${pet.ageMonths}m`}
+                          image={pet.images?.[0] || '/placeholder.svg'}
+                          isFavorited={favorites.has(pet._id)}
                           onFavorite={handleFavorite}
                         />
                       </div>

@@ -9,9 +9,20 @@ import { GradientButton } from '@/components/ui/gradient-button'
 import { BlobBackground } from '@/components/ui/blob-background'
 import { PetCard } from '@/components/ui/pet-card'
 
+interface Pet {
+  _id: string
+  name: string
+  breed: string
+  ageYears: number
+  ageMonths: number
+  images: string[]
+}
+
 export default function Home() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [scrollY, setScrollY] = useState(0)
+  const [featuredPets, setFeaturedPets] = useState<Pet[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +30,27 @@ export default function Home() {
     }
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    const fetchFeaturedPets = async () => {
+      try {
+        const response = await fetch('/api/pets')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success && data.data.length > 0) {
+            // Take first 3 pets as featured
+            setFeaturedPets(data.data.slice(0, 3))
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching featured pets:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchFeaturedPets()
   }, [])
 
   const handleFavorite = (id: string) => {
@@ -30,12 +62,6 @@ export default function Home() {
     }
     setFavorites(newFavorites)
   }
-
-  const featuredPets = [
-    { id: '1', name: 'Luna', breed: 'Golden Retriever', age: '2', image: '/golden-retriever-puppy.png' },
-    { id: '2', name: 'Milo', breed: 'Tabby Cat', age: '1', image: '/cute-tabby-cat.png' },
-    { id: '3', name: 'Max', breed: 'Husky Mix', age: '3', image: '/husky-dog-smiling.jpg' },
-  ]
 
   const features = [
     {
@@ -166,15 +192,43 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {featuredPets.map((pet, index) => (
-              <div key={pet.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                <PetCard
-                  {...pet}
-                  isFavorited={favorites.has(pet.id)}
-                  onFavorite={handleFavorite}
-                />
-              </div>
-            ))}
+            {isLoading ? (
+              // Show loading placeholders
+              [...Array(3)].map((_, index) => (
+                <div key={index} className="animate-slide-up glass-effect rounded-2xl p-6 h-64 flex items-center justify-center" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <div className="text-[#6B7280]">Loading pets...</div>
+                </div>
+              ))
+            ) : featuredPets.length > 0 ? (
+              featuredPets.map((pet, index) => (
+                <div key={pet._id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <PetCard
+                    id={pet._id}
+                    name={pet.name}
+                    breed={pet.breed}
+                    age={`${pet.ageYears}y ${pet.ageMonths}m`}
+                    image={pet.images?.[0] || '/placeholder.svg'}
+                    isFavorited={favorites.has(pet._id)}
+                    onFavorite={handleFavorite}
+                  />
+                </div>
+              ))
+            ) : (
+              // Fallback to default pets if API fails
+              [
+                { id: '1', name: 'Luna', breed: 'Golden Retriever', age: '2 years', image: '/golden-retriever-puppy.png' },
+                { id: '2', name: 'Milo', breed: 'Tabby Cat', age: '1 year', image: '/cute-tabby-cat.png' },
+                { id: '3', name: 'Max', breed: 'Husky Mix', age: '3 years', image: '/husky-dog-smiling.jpg' },
+              ].map((pet, index) => (
+                <div key={pet.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <PetCard
+                    {...pet}
+                    isFavorited={favorites.has(pet.id)}
+                    onFavorite={handleFavorite}
+                  />
+                </div>
+              ))
+            )}
           </div>
 
           <div className="text-center">
