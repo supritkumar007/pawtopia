@@ -1,14 +1,9 @@
 {
-  "/auth/forgot-password/page": "app/auth/forgot-password/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/pets/route": "app/api/pets/route.js",
   "/auth/signin/page": "app/auth/signin/page.js",
   "/auth/signup/page": "app/auth/signup/page.js",
-  "/blog/page": "app/blog/page.js",
-  "/browse/page": "app/browse/page.js",
   "/dashboard/page": "app/dashboard/page.js",
-  "/lost-and-found/page": "app/lost-and-found/page.js",
   "/page": "app/page.js",
-  "/pet/[id]/page": "app/pet/[id]/page.js",
-  "/shelters/[id]/page": "app/shelters/[id]/page.js",
-  "/shelters/page": "app/shelters/page.js"
+  "/pet/[id]/page": "app/pet/[id]/page.js"
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/config/db';
 import Adoption from '@/lib/models/Adoption';
 import Pet from '@/lib/models/Pet';
+import User from '@/lib/models/User';
 import { authRequired, adminRequired } from '@/lib/middleware/auth';
 
 // PATCH /api/adoption/[id]/approve - Approve adoption application (Admin)
@@ -31,6 +32,13 @@ export async function PATCH(request, { params }) {
     if (pet) {
       pet.status = 'adopted';
       await pet.save();
+    }
+
+    // Add adoption to user's adoptedPets array
+    const adoptionUser = await User.findById(adoption.userId);
+    if (adoptionUser && !adoptionUser.adoptedPets.includes(adoption._id)) {
+      adoptionUser.adoptedPets.push(adoption._id);
+      await adoptionUser.save();
     }
 
     return NextResponse.json({

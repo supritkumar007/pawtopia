@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     await connectDB();
 
-    const { name, email, phone, password, location } = await request.json();
+    const { name, email, phone, password, city, state, avatar } = await request.json();
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
@@ -19,13 +19,18 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    // Create user
+    // Create user - ALWAYS set role to "user" (cannot be changed from frontend)
     const user = await User.create({
       name,
       email,
       phone,
       password,
-      location: location || { city: '', state: '' }
+      role: 'user', // Force user role on registration
+      location: {
+        city: city || '',
+        state: state || ''
+      },
+      avatar: avatar || ''
     });
 
     if (user) {

@@ -11,24 +11,51 @@ export async function GET(request) {
 
     const user = await authRequired(request);
 
+    // Fetch user's own data with populated favorites
     const userDoc = await User.findById(user._id)
       .select('-password')
       .populate({
         path: 'favorites',
-        select: 'name type breed images status'
+        match: { status: 'available' }, // Only show available pets in favorites
+        select: 'name type breed images status ageYears ageMonths gender adoptionFee'
+      })
+      .populate({
+        path: 'adoptedPets',
+        populate: {
+          path: 'petId',
+          select: 'name type breed images adoptionFee'
+        }
       });
 
-    // Get adopted pets
-    const adoptedPets = await Adoption.find({
-      userId: user._id,
-      status: 'approved'
-    }).populate('petId', 'name type breed images');
+    if (!userDoc) {
+      return NextResponse.json({
+        success: false,
+        message: 'User not found'
+      }, { status: 404 });
+    }
+
+    // Get user's adoption applications
+    const adoptions = await Adoption.find({ userId: user._id })
+      .populate('petId', 'name type breed images status')
+      .sort({ submittedAt: -1 });
 
     return NextResponse.json({
       success: true,
       data: {
-        user: userDoc,
-        adoptedPets: adoptedPets.map(a => a.petId)
+        user: {
+          _id: userDoc._id,
+          name: userDoc.name,
+          email: userDoc.email,
+          phone: userDoc.phone,
+          role: userDoc.role,
+          location: userDoc.location,
+          avatar: userDoc.avatar,
+          preferences: userDoc.preferences,
+          createdAt: userDoc.createdAt
+        },
+        favorites: userDoc.favorites?.filter(pet => pet !== null) || [],
+        adoptions: adoptions,
+        adoptedPets: adoptions.filter(a => a.status === 'approved').map(a => a.petId)
       }
     });
   } catch (error) {

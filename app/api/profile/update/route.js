@@ -9,7 +9,7 @@ export async function PUT(request) {
     await connectDB();
 
     const user = await authRequired(request);
-    const { name, phone, location, avatar } = await request.json();
+    const { name, phone, city, state, avatar, preferences } = await request.json();
 
     const userDoc = await User.findById(user._id);
 
@@ -23,15 +23,24 @@ export async function PUT(request) {
     // Update fields
     if (name) userDoc.name = name;
     if (phone) userDoc.phone = phone;
-    if (location) userDoc.location = location;
+    if (city || state) {
+      userDoc.location = {
+        city: city || userDoc.location.city,
+        state: state || userDoc.location.state
+      };
+    }
     if (avatar) userDoc.avatar = avatar;
+    if (preferences) userDoc.preferences = preferences;
 
     await userDoc.save();
+
+    // Return updated profile without password
+    const updatedUser = await User.findById(userDoc._id).select('-password');
 
     return NextResponse.json({
       success: true,
       message: 'Profile updated successfully',
-      data: userDoc
+      data: updatedUser
     });
   } catch (error) {
     return NextResponse.json({
