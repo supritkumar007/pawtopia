@@ -6,12 +6,14 @@ import { authRequired, adminRequired } from '@/lib/middleware/auth';
 // GET /api/pets - Get all available pets (Public)
 export async function GET() {
   try {
+    console.log('GET /api/pets called');
     await connectDB();
+    console.log('Database connected');
 
-    // Only show available pets to public
-    const pets = await Pet.find({ status: 'available' })
-      .populate('shelterId', 'name address phone')
-      .sort({ createdAt: -1 });
+    // Simple query without populate for testing
+    console.log('Fetching pets...');
+    const pets = await Pet.find({ status: 'available' }).limit(5);
+    console.log(`Found ${pets.length} pets`);
 
     return NextResponse.json({
       success: true,
@@ -19,7 +21,18 @@ export async function GET() {
       data: pets
     });
   } catch (error) {
-    console.error('Error fetching pets:', error);
+    console.error('Error in GET /api/pets:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
+    // Try to provide more context about the error
+    if (error.name === 'MongoServerSelectionError') {
+      console.error('This is a MongoDB connection error. Check your MONGODB_URI environment variable.');
+    } else if (error.name === 'MongoNetworkError') {
+      console.error('This is a MongoDB network error. Check your network connection.');
+    }
+    
     return NextResponse.json({
       success: false,
       message: error.message || 'Failed to fetch pets'
@@ -44,13 +57,18 @@ export async function POST(request) {
       data: pet
     }, { status: 201 });
   } catch (error) {
+    console.error('Error in POST /api/pets:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
     return NextResponse.json({
       success: false,
-      message: error.message,
-      redirect: error.message.includes('Not authorized') ? '/signin' : undefined
-    }, {
-      status: error.message.includes('Admin access required') ? 403 :
-             error.message.includes('Not authorized') ? 401 : 500
+      message: error.message || 'Failed to create pet',
+      redirect: error.message?.includes('Not authorized') ? '/signin' : undefined
+    }, { 
+      status: error.message?.includes('Admin access required') ? 403 :
+             error.message?.includes('Not authorized') ? 401 : 500 
     });
   }
 }
