@@ -43,6 +43,15 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Pet'
   }],
+  adoptedPets: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Adoption'
+  }],
+  preferences: {
+    petTypes: [{ type: String }],
+    size: { type: String },
+    location: { type: String }
+  },
   createdAt: {
     type: Date,
     default: Date.now

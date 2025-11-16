@@ -1,5 +1,6 @@
 const Adoption = require('../models/Adoption');
 const Pet = require('../models/Pet');
+const User = require('../models/User');
 
 // @desc    Submit adoption application
 // @route   POST /api/adoption/apply
@@ -159,6 +160,13 @@ const approveAdoption = async (req, res) => {
     if (pet) {
       pet.status = 'adopted';
       await pet.save();
+    }
+
+    // Add adoption to user's adoptedPets array
+    const user = await User.findById(adoption.userId);
+    if (user && !user.adoptedPets.includes(adoption._id)) {
+      user.adoptedPets.push(adoption._id);
+      await user.save();
     }
 
     res.status(200).json({

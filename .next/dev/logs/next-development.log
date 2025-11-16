@@ -312,3 +312,163 @@ Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
 [03:43:47.899] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/browse color: rgb(120, 120, 120) color: inherit {"dp":"/browse","o":"http://localhost:3000/browse","sdkn":"@vercel/analytics/next","sdkv":"1.5.0","sv":"0.1.3","ts":1763204977295}
 [03:43:49.395] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/auth/signin color: rgb(120, 120, 120) color: inherit {"dp":"/auth/signin","o":"http://localhost:3000/auth/signin","sdkn":"@vercel/analytics/next","sdkv":"1.5.0","sv":"0.1.3","ts":1763204978807}
 [03:45:46.169] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/auth/signup color: rgb(120, 120, 120) color: inherit {"dp":"/auth/signup","o":"http://localhost:3000/auth/signup","sdkn":"@vercel/analytics/next","sdkv":"1.5.0","sv":"0.1.3","ts":1763205095580}
+[05:01:21.114] Server  ERROR   D:\BEDegree\5th-Sem\CC\PetAdopt\node_modules\.pnpm\next@16.0.3_react-dom@19.2.0_react@19.2.0__react@19.2.0\node_modules\next\dist\server\dev\log-requests.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[05:01:21.118] Server  ERROR   D:\BEDegree\5th-Sem\CC\PetAdopt\node_modules\.pnpm\next@16.0.3_react-dom@19.2.0_react@19.2.0__react@19.2.0\node_modules\next\dist\server\dev\next-dev-server.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[05:01:21.146] Server  ERROR   Error: EPIPE: broken pipe, write
+[05:01:21.153] Server  ERROR   D:\BEDegree\5th-Sem\CC\PetAdopt\node_modules\.pnpm\next@16.0.3_react-dom@19.2.0_react@19.2.0__react@19.2.0\node_modules\next\dist\server\dev\log-requests.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[05:01:21.154] Server  ERROR   D:\BEDegree\5th-Sem\CC\PetAdopt\node_modules\.pnpm\next@16.0.3_react-dom@19.2.0_react@19.2.0__react@19.2.0\node_modules\next\dist\server\dev\next-dev-server.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[05:01:21.154] Server  ERROR    ⨯ "uncaughtException:" Error: EPIPE: broken pipe, write
+[05:01:21.155] Server  ERROR   D:\BEDegree\5th-Sem\CC\PetAdopt\node_modules\.pnpm\next@16.0.3_react-dom@19.2.0_react@19.2.0__react@19.2.0\node_modules\next\dist\server\dev\log-requests.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[05:01:21.155] Server  ERROR   D:\BEDegree\5th-Sem\CC\PetAdopt\node_modules\.pnpm\next@16.0.3_react-dom@19.2.0_react@19.2.0__react@19.2.0\node_modules\next\dist\server\dev\next-dev-server.js: Invalid source map. Only conformant source maps can be used to find the original code. Cause: Error: sourceMapURL could not be parsed
+[05:01:21.156] Server  ERROR    ⨯ "uncaughtException: " Error: EPIPE: broken pipe, write
+[05:01:24.455] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <InnerLayoutRouter url="/auth/signup" tree={[...]} params={{}} cacheNode={{lazyData:null, ...}} segmentPath={[...]} ...>
+      <SegmentViewNode type="page" pagePath="auth/signu...">
+        <SegmentTrieNode>
+        <ClientPageRoot Component={function SignUpPage} serverProvidedParams={{...}}>
+          <SignUpPage params={Promise} searchParams={Promise}>
+            <Navbar>
+              <nav className="glass-effe...">
+                <div className="max-w-7xl ...">
+                  <div className="flex justi...">
+                    <LinkComponent>
+                    <div>
+                    <div className="hidden md:...">
+                      <LinkComponent>
+                      <LinkComponent href="/auth/signin">
+                        <a ref={function} onClick={function onClick} onMouseEnter={function onMouseEnter} ...>
+                          <GradientButton size="sm">
+                            <button
+                              className="font-medium transition-all duration-300 rounded-xl active:scale-95 bg-gradien..."
+-                             fdprocessedid="pjm9ap"
+                            >
++                             Sign In
+                    ...
+            ...
+              <div className="relative w..." style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                <div className="glass-effe...">
+                  <div>
+                  <AuthForm type="signup" onSubmit={function handleSubmit} isLoading={false}>
+                    <motion.form onSubmit={function handleSubmit} className="space-y-6 ..." ...>
+                      <form onSubmit={function handleSubmit} className="space-y-6 ..." style={{opacity:0, ...}} ...>
+                        ...
+                          <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                            <FormInput label="Full Name" name="name" placeholder="Your name" value="" ...>
+                              <div className="w-full">
+                                <label>
+                                <div className="relative">
+                                  <input
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white/80 tex..."
+                                    name="name"
+                                    placeholder="Your name"
+                                    value=""
+                                    onChange={function handleChange}
+                                    required={true}
+-                                   fdprocessedid="uqj3fq"
+                                  >
+                        ...
+                          <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                            <FormInput label="Email Address" type="email" name="email" placeholder="you@exampl..." ...>
+                              <div className="w-full">
+                                <label>
+                                <div className="relative">
+                                  <input
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white/80 tex..."
+                                    type="email"
+                                    name="email"
+                                    placeholder="you@example.com"
+                                    value=""
+                                    onChange={function handleChange}
+                                    required={true}
+-                                   fdprocessedid="m1wjpw"
+                                  >
+                        ...
+                          <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                            <FormInput label="Phone Number" name="phone" placeholder="+91 98765 ..." value="" ...>
+                              <div className="w-full">
+                                <label>
+                                <div className="relative">
+                                  <input
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white/80 tex..."
+                                    name="phone"
+                                    placeholder="+91 98765 43210"
+                                    value=""
+                                    onChange={function handleChange}
+                                    required={true}
+-                                   fdprocessedid="7a9bn"
+                                  >
+                        <motion.div variants={{hidden:{...}, ...}}>
+                          <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                            <label>
+                            <LocationSelect value="" onChange={function handleLocationChange} error={undefined} ...>
+                              <div className="relative">
+                                <button
+                                  onClick={function onClick}
+                                  className="w-full px-4 py-3 text-left bg-white rounded-lg border-2 transition-all du..."
+-                                 fdprocessedid="rvwmv8"
+                                >
+                        <motion.div variants={{hidden:{...}, ...}}>
+                          <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                            <label>
+                            <div className="relative">
+                              <input
+                                type="password"
+                                name="password"
+                                placeholder="••••••••"
+                                value=""
+                                onChange={function handleChange}
+                                className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white/80 text-[#..."
+                                required={true}
+-                               fdprocessedid="4r209g"
+                              >
+                              <button
+                                type="button"
+                                onClick={function onClick}
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#6B7280] hover:te..."
+-                               fdprocessedid="awus0f"
+                              >
+                        ...
+                          <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                            <FormInput label="Confirm Pa..." type="password" name="confirmPas..." placeholder="••••••••" ...>
+                              <div className="w-full">
+                                <label>
+                                <div className="relative">
+                                  <input
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-transparent bg-white/80 tex..."
+                                    type="password"
+                                    name="confirmPassword"
+                                    placeholder="••••••••"
+                                    value=""
+                                    onChange={function handleChange}
+                                    required={true}
+-                                   fdprocessedid="k8x2qs"
+                                  >
+                        <motion.div variants={{hidden:{...}, ...}}>
+                          <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+                            <GradientButton type="submit" disabled={false} className="w-full" size="lg">
+                              <button
+                                className="font-medium transition-all duration-300 rounded-xl active:scale-95 bg-gradi..."
+                                type="submit"
+                                disabled={false}
+-                               fdprocessedid="wqzj4m"
+                              >
++                               Create Account
+                  ...
+            ...
+      ...
+
+[05:01:24.455] Browser LOG     %c[Vercel Web Analytics]%c Debug mode is enabled by default in development. No requests will be sent to the server. color: rgb(120, 120, 120) color: inherit
+[05:01:24.455] Browser LOG     %c[Vercel Web Analytics]%c Running queued event color: rgb(120, 120, 120) color: inherit pageview {"path":"/auth/signup","route":"/auth/signup"}
+[05:01:24.455] Browser LOG     %c[Vercel Web Analytics]%c [pageview] http://localhost:3000/auth/signup color: rgb(120, 120, 120) color: inherit {"dp":"/auth/signup","o":"http://localhost:3000/auth/signup","r":"","sdkn":"@vercel/analytics/next","sdkv":"1.5.0","sv":"0.1.3","ts":1763209632914}

@@ -6,7 +6,7 @@ const { generateAccessToken, generateRefreshToken } = require('../utils/generate
 // @access  Public
 const register = async (req, res) => {
   try {
-    const { name, email, phone, password, location } = req.body;
+    const { name, email, phone, password, city, state, avatar } = req.body;
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
@@ -18,13 +18,18 @@ const register = async (req, res) => {
       });
     }
 
-    // Create user
+    // Create user - ALWAYS set role to "user" (cannot be changed from frontend)
     const user = await User.create({
       name,
       email,
       phone,
       password,
-      location: location || { city: '', state: '' }
+      role: 'user', // Force user role on registration
+      location: {
+        city: city || '',
+        state: state || ''
+      },
+      avatar: avatar || ''
     });
 
     if (user) {

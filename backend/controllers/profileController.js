@@ -6,24 +6,51 @@ const Adoption = require('../models/Adoption');
 // @access  Private
 const getProfile = async (req, res) => {
   try {
+    // Fetch user's own data with populated favorites
     const user = await User.findById(req.user._id)
       .select('-password')
       .populate({
         path: 'favorites',
-        select: 'name type breed images status'
+        match: { status: 'available' }, // Only show available pets in favorites
+        select: 'name type breed images status ageYears ageMonths gender adoptionFee'
+      })
+      .populate({
+        path: 'adoptedPets',
+        populate: {
+          path: 'petId',
+          select: 'name type breed images adoptionFee'
+        }
       });
 
-    // Get adopted pets
-    const adoptedPets = await Adoption.find({
-      userId: req.user._id,
-      status: 'approved'
-    }).populate('petId', 'name type breed images');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Get user's adoption applications
+    const adoptions = await Adoption.find({ userId: req.user._id })
+      .populate('petId', 'name type breed images status')
+      .sort({ submittedAt: -1 });
 
     res.status(200).json({
       success: true,
       data: {
-        user,
-        adoptedPets: adoptedPets.map(a => a.petId)
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          location: user.location,
+          avatar: user.avatar,
+          preferences: user.preferences,
+          createdAt: user.createdAt
+        },
+        favorites: user.favorites || [],
+        adoptions: adoptions,
+        adoptedPets: adoptions.filter(a => a.status === 'approved').map(a => a.petId)
       }
     });
   } catch (error) {
@@ -39,7 +66,7 @@ const getProfile = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    const { name, phone, location, avatar } = req.body;
+    const { name, phone, city, state, avatar, preferences } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -53,15 +80,24 @@ const updateProfile = async (req, res) => {
     // Update fields
     if (name) user.name = name;
     if (phone) user.phone = phone;
-    if (location) user.location = location;
+    if (city || state) {
+      user.location = {
+        city: city || user.location.city,
+        state: state || user.location.state
+      };
+    }
     if (avatar) user.avatar = avatar;
+    if (preferences) user.preferences = preferences;
 
     await user.save();
+
+    // Return updated profile without password
+    const updatedUser = await User.findById(user._id).select('-password');
 
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
-      data: user
+      data: updatedUser
     });
   } catch (error) {
     res.status(500).json({

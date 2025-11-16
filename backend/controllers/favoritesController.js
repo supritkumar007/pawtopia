@@ -87,15 +87,28 @@ const removeFromFavorites = async (req, res) => {
 // @access  Private
 const getMyFavorites = async (req, res) => {
   try {
+    // Get only the logged-in user's favorites
     const user = await User.findById(req.user._id).populate({
       path: 'favorites',
-      select: 'name type breed images status ageYears ageMonths gender adoptionFee'
+      match: { status: 'available' }, // Only show available pets
+      select: 'name type breed images status ageYears ageMonths gender adoptionFee size temperament'
     });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Filter out null entries (pets that no longer exist or are not available)
+    const validFavorites = user.favorites.filter(pet => pet !== null);
 
     res.status(200).json({
       success: true,
-      count: user.favorites.length,
-      data: user.favorites
+      count: validFavorites.length,
+      data: validFavorites,
+      message: validFavorites.length === 0 ? 'No favorites yet' : undefined
     });
   } catch (error) {
     res.status(500).json({
