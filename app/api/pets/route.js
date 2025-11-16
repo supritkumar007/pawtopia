@@ -19,9 +19,10 @@ export async function GET() {
       data: pets
     });
   } catch (error) {
+    console.error('Error fetching pets:', error);
     return NextResponse.json({
       success: false,
-      message: error.message
+      message: error.message || 'Failed to fetch pets'
     }, { status: 500 });
   }
 }

@@ -46,7 +46,7 @@ export default function DashboardPage() {
             localStorage.removeItem('accessToken')
             router.push('/auth/signin')
           }
-          throw new Error('Failed to fetch profile')
+          throw new Error(`HTTP error! status: ${profileRes.status}`)
         }
 
         const profileData = await profileRes.json()
@@ -69,8 +69,13 @@ export default function DashboardPage() {
         setFavorites(profileData.data.favorites || [])
         setApplications(profileData.data.adoptions || [])
         setLoading(false)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching user data:', error)
+        // If it's an auth error, redirect to signin
+        if (error.message?.includes('Not authorized') || error.message?.includes('401')) {
+          localStorage.removeItem('accessToken')
+          router.push('/auth/signin')
+        }
         setLoading(false)
       }
     }

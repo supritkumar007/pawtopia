@@ -59,10 +59,11 @@ export async function GET(request) {
       }
     });
   } catch (error) {
+    console.error('Error fetching profile:', error);
     return NextResponse.json({
       success: false,
-      message: error.message,
-      redirect: error.message.includes('Not authorized') ? '/signin' : undefined
-    }, { status: error.message.includes('Not authorized') ? 401 : 500 });
+      message: error.message || 'Failed to fetch profile',
+      redirect: error.message?.includes('Not authorized') ? '/signin' : undefined
+    }, { status: error.message?.includes('Not authorized') ? 401 : 500 });
   }
 }

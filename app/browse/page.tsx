@@ -45,9 +45,10 @@ export default function BrowsePetsPage() {
     const fetchPets = async () => {
       try {
         setIsLoading(true)
+        setError(null)
         const response = await fetch('/api/pets')
         if (!response.ok) {
-          throw new Error('Failed to fetch pets')
+          throw new Error(`HTTP error! status: ${response.status}`)
         }
         const data = await response.json()
         if (data.success) {
@@ -219,6 +220,17 @@ export default function BrowsePetsPage() {
 
             {/* Pet Grid */}
             <div className={isFilterOpen ? 'lg:col-span-3' : 'lg:col-span-4'}>
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                  <p>Error: {error}</p>
+                  <button 
+                    onClick={() => window.location.reload()} 
+                    className="mt-2 px-4 py-2 bg-red-100 hover:bg-red-200 rounded-md text-red-800"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {[...Array(6)].map((_, i) => (
