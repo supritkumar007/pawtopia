@@ -1,6 +1,7 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Heart, FileText, Clock, CheckCircle, Phone, Mail, MapPin, Settings, Edit, LogOut } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
@@ -11,49 +12,71 @@ import { GlassCard } from '@/components/ui/glass-card'
 import { BadgeTag } from '@/components/ui/badge-tag'
 import { SignOutButton } from '@/components/ui/sign-out-button'
 import { GradientHeader } from '@/components/ui/gradient-header'
+import { Spinner } from '@/components/ui/spinner'
 
 export default function DashboardPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<'favorites' | 'applications' | 'profile' | 'settings'>('favorites')
   const [showSignOutModal, setShowSignOutModal] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [userProfile, setUserProfile] = useState<any>(null)
+  const [favorites, setFavorites] = useState<any[]>([])
+  const [applications, setApplications] = useState<any[]>([])
 
-  const userProfile = {
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    phone: '+91 98765 43210',
-    location: 'Mumbai, Maharashtra',
-    avatar: '/placeholder-user.jpg',
-    memberSince: 'January 2024',
-  }
+  // Fetch user data on mount
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = localStorage.getItem('accessToken')
+        
+        if (!token) {
+          router.push('/auth/signin')
+          return
+        }
 
-  const favorites = [
-    { id: '1', name: 'Luna', breed: 'Golden Retriever', age: '2', image: '/golden-retriever-puppy.png' },
-    { id: '2', name: 'Milo', breed: 'Tabby Cat', age: '1', image: '/cute-tabby-cat.png' },
-    { id: '3', name: 'Max', breed: 'Husky Mix', age: '3', image: '/husky-dog-smiling.jpg' },
-  ]
+        // Fetch user profile
+        const profileRes = await fetch('/api/profile/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
 
-  const applications = [
-    {
-      id: '1',
-      petName: 'Luna',
-      status: 'approved',
-      appliedDate: '2024-01-15',
-      message: 'Your adoption has been approved! Contact the shelter to finalize the paperwork.',
-    },
-    {
-      id: '2',
-      petName: 'Charlie',
-      status: 'pending',
-      appliedDate: '2024-01-10',
-      message: 'Your application is under review. You will hear back within 3-5 business days.',
-    },
-    {
-      id: '3',
-      petName: 'Max',
-      status: 'rejected',
-      appliedDate: '2024-01-05',
-      message: 'Unfortunately, this application was not approved. View other pets to continue your search.',
-    },
-  ]
+        if (!profileRes.ok) {
+          if (profileRes.status === 401) {
+            localStorage.removeItem('accessToken')
+            router.push('/auth/signin')
+          }
+          throw new Error('Failed to fetch profile')
+        }
+
+        const profileData = await profileRes.json()
+        
+        // Check if user is admin and redirect
+        if (profileData.data.user.role === 'admin') {
+          router.push('/admin/dashboard')
+          return
+        }
+
+        setUserProfile({
+          name: profileData.data.user.name,
+          email: profileData.data.user.email,
+          phone: profileData.data.user.phone,
+          location: `${profileData.data.user.location.city}, ${profileData.data.user.location.state}`,
+          avatar: profileData.data.user.avatar || '/placeholder-user.jpg',
+          memberSince: new Date(profileData.data.user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        })
+
+        setFavorites(profileData.data.favorites || [])
+        setApplications(profileData.data.adoptions || [])
+        setLoading(false)
+      } catch (error) {
+        console.error('Error fetching user data:', error)
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [])
 
   const statusColors = {
     approved: { bg: 'bg-[#B3E5CC]/20', text: 'text-[#2A8659]', label: 'Approved' },
@@ -62,9 +85,21 @@ export default function DashboardPage() {
   }
 
   const handleSignOut = () => {
-    // Handle sign out logic
-    console.log('Signing out...')
-    setShowSignOutModal(false)
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    router.push('/auth/signin')
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner className="w-12 h-12" />
+      </div>
+    )
+  }
+
+  if (!userProfile) {
+    return null
   }
 
   return (
@@ -126,39 +161,89 @@ export default function DashboardPage() {
               {/* Tab Content */}
               <div className="space-y-6">
                 {activeTab === 'favorites' && (
-                  <FavoritesGrid
-                    favorites={favorites}
-                    onRemoveFavorite={(id) => console.log('Remove favorite:', id)}
-                  />
+                  favorites.length > 0 ? (
+                    <FavoritesGrid
+                      favorites={favorites.map(pet => ({
+                        id: pet._id,
+                        name: pet.name,
+                        breed: pet.breed,
+                        age: `${pet.ageYears}`,
+                        image: pet.images?.[0] || '/placeholder-pet.jpg'
+                      }))}
+                      onRemoveFavorite={async (id) => {
+                        try {
+                          const token = localStorage.getItem('accessToken')
+                          await fetch('/api/favorites/remove', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({ petId: id })
+                          })
+                          setFavorites(favorites.filter(f => f._id !== id))
+                        } catch (error) {
+                          console.error('Error removing favorite:', error)
+                        }
+                      }}
+                    />
+                  ) : (
+                    <GlassCard>
+                      <div className="text-center py-12">
+                        <Heart className="mx-auto mb-4 text-gray-400" size={48} />
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No favorites yet</h3>
+                        <p className="text-gray-500 mb-4">Start adding pets to your favorites!</p>
+                        <GradientButton onClick={() => router.push('/browse')}>Browse Pets</GradientButton>
+                      </div>
+                    </GlassCard>
+                  )
                 )}
 
                 {activeTab === 'applications' && (
-                  <div className="space-y-4">
-                    {applications.map((app) => {
-                      const colors = statusColors[app.status as keyof typeof statusColors]
-                      return (
-                        <GlassCard key={app.id}>
-                          <div className="flex items-start justify-between mb-4">
-                            <div>
-                              <h3 className="font-bold text-[#2A2D34] text-lg">{app.petName}</h3>
-                              <p className="text-sm text-[#6B7280] flex items-center gap-2 mt-1">
-                                <Clock size={14} />
-                                Applied: {app.appliedDate}
-                              </p>
+                  applications.length > 0 ? (
+                    <div className="space-y-4">
+                      {applications.map((app) => {
+                        const colors = statusColors[app.status as keyof typeof statusColors]
+                        const statusMessages = {
+                          submitted: 'Your application is under review. You will hear back within 3-5 business days.',
+                          approved: 'Your adoption has been approved! Contact the shelter to finalize the paperwork.',
+                          rejected: 'Unfortunately, this application was not approved. View other pets to continue your search.'
+                        }
+                        return (
+                          <GlassCard key={app._id}>
+                            <div className="flex items-start justify-between mb-4">
+                              <div>
+                                <h3 className="font-bold text-[#2A2D34] text-lg">{app.petId?.name || 'Pet'}</h3>
+                                <p className="text-sm text-[#6B7280] flex items-center gap-2 mt-1">
+                                  <Clock size={14} />
+                                  Applied: {new Date(app.submittedAt).toLocaleDateString()}
+                                </p>
+                              </div>
+                              <BadgeTag variant={app.status === 'approved' ? 'success' : app.status === 'submitted' ? 'warning' : 'error'}>
+                                {app.status === 'submitted' ? 'Pending' : colors.label}
+                              </BadgeTag>
                             </div>
-                            <BadgeTag variant={app.status === 'approved' ? 'success' : app.status === 'pending' ? 'warning' : 'error'}>
-                              {colors.label}
-                            </BadgeTag>
-                          </div>
-                          <p className="text-[#6B7280] text-sm mb-4">{app.message}</p>
-                          <div className="flex gap-2">
-                            <GradientButton size="sm">View Pet</GradientButton>
-                            <GradientButton size="sm" variant="secondary">Contact Shelter</GradientButton>
-                          </div>
-                        </GlassCard>
-                      )
-                    })}
-                  </div>
+                            <p className="text-[#6B7280] text-sm mb-4">{statusMessages[app.status as keyof typeof statusMessages]}</p>
+                            <div className="flex gap-2">
+                              {app.petId && (
+                                <GradientButton size="sm" onClick={() => router.push(`/pet/${app.petId._id}`)}>View Pet</GradientButton>
+                              )}
+                              <GradientButton size="sm" variant="secondary">Contact Shelter</GradientButton>
+                            </div>
+                          </GlassCard>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <GlassCard>
+                      <div className="text-center py-12">
+                        <FileText className="mx-auto mb-4 text-gray-400" size={48} />
+                        <h3 className="text-lg font-semibold text-gray-700 mb-2">No applications yet</h3>
+                        <p className="text-gray-500 mb-4">Apply for a pet adoption to see your applications here!</p>
+                        <GradientButton onClick={() => router.push('/browse')}>Browse Pets</GradientButton>
+                      </div>
+                    </GlassCard>
+                  )
                 )}
 
                 {activeTab === 'profile' && (

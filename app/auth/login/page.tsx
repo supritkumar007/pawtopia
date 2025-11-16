@@ -2,12 +2,14 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Mail, Lock } from 'lucide-react'
 import { AuthCard } from '@/components/ui/auth-card'
 import { FormInput } from '@/components/ui/form-input'
 import { GradientButton } from '@/components/ui/gradient-button'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -38,9 +40,43 @@ export default function LoginPage() {
       return
     }
 
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setIsLoading(false)
-    alert('Login successful!')
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        setErrors({ password: data.message || 'Login failed' })
+        setIsLoading(false)
+        return
+      }
+
+      // Save tokens
+      localStorage.setItem('accessToken', data.data.accessToken)
+      localStorage.setItem('refreshToken', data.data.refreshToken)
+      localStorage.setItem('userRole', data.data.role)
+      localStorage.setItem('userName', data.data.name)
+
+      // Redirect based on role
+      if (data.data.role === 'admin') {
+        router.push('/admin/dashboard')
+      } else {
+        router.push('/dashboard')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      setErrors({ password: 'An error occurred. Please try again.' })
+      setIsLoading(false)
+    }
   }
 
   return (
