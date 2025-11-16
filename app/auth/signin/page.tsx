@@ -31,8 +31,16 @@ export default function SignInPage() {
         // Store tokens in localStorage
         localStorage.setItem('accessToken', result.data.accessToken)
         localStorage.setItem('refreshToken', result.data.refreshToken)
+        localStorage.setItem('userRole', result.data.role)
+        localStorage.setItem('userName', result.data.name)
         localStorage.setItem('user', JSON.stringify(result.data))
-        router.push('/dashboard')
+        
+        // Redirect based on role
+        if (result.data.role === 'admin') {
+          router.push('/admin/dashboard')
+        } else {
+          router.push('/dashboard')
+        }
       } else {
         alert(result.message || 'Login failed')
       }
