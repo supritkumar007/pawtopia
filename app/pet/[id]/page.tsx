@@ -93,7 +93,9 @@ export default function PetDetailsPage() {
             images: apiPet.images || [],
             shelter: {
               name: apiPet.shelterId?.name || 'Unknown Shelter',
-              location: apiPet.shelterId?.address || 'Location not available',
+              location: apiPet.shelterId?.address
+                ? `${apiPet.shelterId.address.street || ''}, ${apiPet.shelterId.address.city || ''}, ${apiPet.shelterId.address.state || ''} ${apiPet.shelterId.address.pincode || ''}`.trim().replace(/^,|,$/, '')
+                : 'Location not available',
               phone: apiPet.shelterId?.phone || 'Phone not available',
               email: apiPet.shelterId?.email || 'Email not available',
             },
