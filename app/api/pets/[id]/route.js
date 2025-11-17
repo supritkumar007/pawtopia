@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/config/db';
 import Pet from '@/lib/models/Pet';
+import Shelter from '@/lib/models/Shelter';
 import { authRequired, adminRequired } from '@/lib/middleware/auth';
 
 // GET /api/pets/[id] - Get single pet by ID (Public)
