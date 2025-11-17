@@ -12,43 +12,19 @@ export async function GET(request, { params }) {
     const { id } = params;
     console.log('Looking for pet with ID:', id);
 
-    // Try different approaches to find the pet
-    let pet = null;
+    // Use the same query pattern as the working /api/pets endpoint
+    // First find without populate to check if it exists
+    const pet = await Pet.findOne({ _id: id, status: 'available' });
 
-    // First try findById
-    try {
-      pet = await Pet.findById(id);
-      console.log('findById result:', !!pet);
-    } catch (error) {
-      console.log('findById error:', error.message);
-    }
-
-    // If not found, try findOne with ObjectId
-    if (!pet) {
-      try {
-        const objectId = new mongoose.Types.ObjectId(id);
-        pet = await Pet.findOne({ _id: objectId });
-        console.log('findOne with ObjectId result:', !!pet);
-      } catch (error) {
-        console.log('findOne with ObjectId error:', error.message);
-      }
-    }
-
-    // If still not found, try findOne with string
-    if (!pet) {
-      try {
-        pet = await Pet.findOne({ _id: id });
-        console.log('findOne with string result:', !!pet);
-      } catch (error) {
-        console.log('findOne with string error:', error.message);
-      }
-    }
-
-    console.log('Final pet found:', !!pet);
+    console.log('Pet found:', !!pet);
 
     // If found, populate shelter info
     if (pet) {
-      pet = await Pet.findById(id).populate('shelterId', 'name address phone email');
+      const populatedPet = await Pet.findById(id).populate('shelterId', 'name address phone email');
+      return NextResponse.json({
+        success: true,
+        data: populatedPet
+      });
     }
 
     if (!pet) {
