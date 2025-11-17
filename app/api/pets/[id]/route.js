@@ -13,15 +13,20 @@ export async function GET(request, { params }) {
 
     const { id } = params;
     console.log('Looking for pet with ID:', id);
+    console.log('ID type:', typeof id);
+    console.log('ID length:', id.length);
 
-    // Use the same query pattern as the working /api/pets endpoint
-    // First find without populate to check if it exists
-    const pet = await Pet.findOne({ _id: id, status: 'available' });
-
-    console.log('Pet found:', !!pet);
-    if (pet) {
-      console.log('Pet data:', { id: pet._id, name: pet.name, status: pet.status });
+    // First check if pet exists at all (without status filter)
+    const petExists = await Pet.findById(id);
+    console.log('Pet exists (any status):', !!petExists);
+    if (petExists) {
+      console.log('Pet status:', petExists.status);
+      console.log('Pet name:', petExists.name);
     }
+
+    // Then check with status filter
+    const pet = await Pet.findOne({ _id: id, status: 'available' });
+    console.log('Pet found with status filter:', !!pet);
 
     // If found, populate shelter info
     if (pet) {
