@@ -7,7 +7,9 @@ import { authRequired, adminRequired } from '@/lib/middleware/auth';
 // GET /api/pets/[id] - Get single pet by ID (Public)
 export async function GET(request, { params }) {
   try {
+    console.log('Connecting to database...');
     await connectDB();
+    console.log('Database connected successfully');
 
     const { id } = params;
     console.log('Looking for pet with ID:', id);
@@ -17,10 +19,14 @@ export async function GET(request, { params }) {
     const pet = await Pet.findOne({ _id: id, status: 'available' });
 
     console.log('Pet found:', !!pet);
+    if (pet) {
+      console.log('Pet data:', { id: pet._id, name: pet.name, status: pet.status });
+    }
 
     // If found, populate shelter info
     if (pet) {
       const populatedPet = await Pet.findById(id).populate('shelterId', 'name address phone email');
+      console.log('Returning populated pet data');
       return NextResponse.json({
         success: true,
         data: populatedPet
