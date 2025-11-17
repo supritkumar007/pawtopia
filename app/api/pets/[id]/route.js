@@ -12,9 +12,18 @@ export async function GET(request, { params }) {
     console.log('Database connected successfully');
 
     const { id } = params;
+    console.log('Params:', params);
     console.log('Looking for pet with ID:', id);
-    console.log('ID type:', typeof id);
-    console.log('ID length:', id.length);
+    if (id) {
+      console.log('ID type:', typeof id);
+      console.log('ID length:', id.length);
+    } else {
+      console.log('ID is undefined or null!');
+      return NextResponse.json({
+        success: false,
+        message: 'Invalid pet ID'
+      }, { status: 400 });
+    }
 
     // First check if pet exists at all (without status filter)
     const petExists = await Pet.findById(id);
