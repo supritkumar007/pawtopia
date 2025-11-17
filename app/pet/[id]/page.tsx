@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, Calendar, Stethoscope, FileText } from 'lucide-react'
@@ -119,31 +119,6 @@ export default function PetDetailsPage() {
       }
     }
 
-    const fetchSimilarPets = async () => {
-      try {
-        const response = await fetch('/api/pets')
-        if (response.ok) {
-          const result = await response.json()
-          if (result.success && result.data.length > 0) {
-            // Get similar pets (same type, exclude current pet)
-            const similar = result.data
-              .filter(pet => pet._id !== petId && pet.type === petData?.type)
-              .slice(0, 3)
-              .map(pet => ({
-                id: pet._id,
-                name: pet.name,
-                breed: pet.breed,
-                age: `${pet.ageYears}`,
-                image: pet.images?.[0] || '/placeholder.svg',
-              }))
-            setSimilarPets(similar)
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching similar pets:', error)
-      }
-    }
-
     if (petId) {
       fetchPetData()
     }
@@ -160,9 +135,9 @@ export default function PetDetailsPage() {
             if (result.success && result.data.length > 0) {
               // Get similar pets (same type, exclude current pet)
               const similar = result.data
-                .filter(pet => pet._id !== petId && pet.type === petData.type)
+                .filter((pet: any) => pet._id !== petId && pet.type === petData.type)
                 .slice(0, 3)
-                .map(pet => ({
+                .map((pet: any) => ({
                   id: pet._id,
                   name: pet.name,
                   breed: pet.breed,
