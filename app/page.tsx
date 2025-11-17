@@ -219,20 +219,11 @@ export default function Home() {
                 </div>
               ))
             ) : (
-              // Fallback to default pets if API fails
-              [
-                { id: '1', name: 'Luna', breed: 'Golden Retriever', age: '2 years', image: '/golden-retriever-puppy.png' },
-                { id: '2', name: 'Milo', breed: 'Tabby Cat', age: '1 year', image: '/cute-tabby-cat.png' },
-                { id: '3', name: 'Max', breed: 'Husky Mix', age: '3 years', image: '/husky-dog-smiling.jpg' },
-              ].map((pet, index) => (
-                <div key={pet.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <PetCard
-                    {...pet}
-                    isFavorited={favorites.has(pet.id)}
-                    onFavorite={handleFavorite}
-                  />
-                </div>
-              ))
+              // Show empty state if no pets available
+              <div className="col-span-full text-center py-12">
+                <p className="text-[#6B7280] text-lg">No pets available at the moment.</p>
+                <p className="text-[#6B7280] mt-2">Check back later for new arrivals!</p>
+              </div>
             )}
           </div>
 
