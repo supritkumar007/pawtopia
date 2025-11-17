@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { ArrowRight, Heart, Users, Zap, Award } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
@@ -105,12 +106,16 @@ export default function Home() {
                 Adopt a pet and change a life. Browse thousands of loving animals waiting for their forever homes.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <GradientButton size="lg" className="flex items-center gap-2">
-                  Start Browsing <ArrowRight size={20} />
-                </GradientButton>
-                <button className="px-8 py-4 text-lg font-medium text-[#6D9EEB] border-2 border-[#6D9EEB] rounded-xl hover:bg-[#6D9EEB]/10 transition-all">
-                  Learn More
-                </button>
+                <Link href="/browse">
+                  <GradientButton size="lg" className="flex items-center gap-2">
+                    Start Browsing <ArrowRight size={20} />
+                  </GradientButton>
+                </Link>
+                <Link href="#why-choose">
+                  <button className="px-8 py-4 text-lg font-medium text-[#6D9EEB] border-2 border-[#6D9EEB] rounded-xl hover:bg-[#6D9EEB]/10 transition-all">
+                    Learn More
+                  </button>
+                </Link>
               </div>
 
               {/* Stats */}
@@ -151,7 +156,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white relative">
+      <section id="why-choose" className="py-20 px-4 sm:px-6 lg:px-8 bg-white relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16 animate-slide-up">
             <h2 className="text-4xl md:text-5xl font-bold text-[#2A2D34] mb-4">Why Choose Pawtopia?</h2>
@@ -232,7 +237,9 @@ export default function Home() {
           </div>
 
           <div className="text-center">
-            <GradientButton size="lg">View All Pets</GradientButton>
+            <Link href="/browse">
+              <GradientButton size="lg">View All Pets</GradientButton>
+            </Link>
           </div>
         </div>
       </section>
@@ -269,9 +276,11 @@ export default function Home() {
           <p className="text-lg text-white/90 mb-8">
             Join thousands of happy pet owners and start your adoption journey today.
           </p>
-          <GradientButton size="lg" className="bg-white text-[#6D9EEB] hover:bg-white/90">
-            Get Started Now
-          </GradientButton>
+          <Link href="/auth/signin">
+            <GradientButton size="lg" className="bg-white text-[#6D9EEB] hover:bg-white/90">
+              Get Started Now
+            </GradientButton>
+          </Link>
         </div>
       </section>
 
