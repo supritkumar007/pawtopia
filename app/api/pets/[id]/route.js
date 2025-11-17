@@ -11,8 +11,10 @@ export async function GET(request, { params }) {
     await connectDB();
     console.log('Database connected successfully');
 
-    const { id } = params;
-    console.log('Params:', params);
+    // In Next.js 15+, params might be a Promise
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
+    console.log('Resolved params:', resolvedParams);
     console.log('Looking for pet with ID:', id);
     if (id) {
       console.log('ID type:', typeof id);
@@ -74,7 +76,8 @@ export async function PATCH(request, { params }) {
     const user = await authRequired(request);
     adminRequired(user);
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const updateData = await request.json();
 
     const pet = await Pet.findByIdAndUpdate(
@@ -118,7 +121,8 @@ export async function DELETE(request, { params }) {
     const user = await authRequired(request);
     adminRequired(user);
 
-    const { id } = params;
+    const resolvedParams = await params;
+    const { id } = resolvedParams;
     const pet = await Pet.findByIdAndDelete(id);
 
     if (!pet) {
