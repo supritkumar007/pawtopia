@@ -9,7 +9,17 @@ export async function GET(request, { params }) {
     await connectDB();
 
     const { id } = params;
-    const pet = await Pet.findById(id).populate('shelterId', 'name address phone email');
+    console.log('Looking for pet with ID:', id);
+    // Try both findById and findOne to see which works
+    let pet = await Pet.findById(id);
+    if (!pet) {
+      console.log('findById failed, trying findOne...');
+      pet = await Pet.findOne({ _id: id });
+    }
+    console.log('Pet found:', !!pet);
+    if (pet) {
+      pet = await Pet.findById(id).populate('shelterId', 'name address phone email');
+    }
 
     if (!pet) {
       return NextResponse.json({
