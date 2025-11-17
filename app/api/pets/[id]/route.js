@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/config/db';
 import Pet from '@/lib/models/Pet';
 import { authRequired, adminRequired } from '@/lib/middleware/auth';
@@ -10,13 +11,42 @@ export async function GET(request, { params }) {
 
     const { id } = params;
     console.log('Looking for pet with ID:', id);
-    // Try both findById and findOne to see which works
-    let pet = await Pet.findById(id);
-    if (!pet) {
-      console.log('findById failed, trying findOne...');
-      pet = await Pet.findOne({ _id: id });
+
+    // Try different approaches to find the pet
+    let pet = null;
+
+    // First try findById
+    try {
+      pet = await Pet.findById(id);
+      console.log('findById result:', !!pet);
+    } catch (error) {
+      console.log('findById error:', error.message);
     }
-    console.log('Pet found:', !!pet);
+
+    // If not found, try findOne with ObjectId
+    if (!pet) {
+      try {
+        const objectId = new mongoose.Types.ObjectId(id);
+        pet = await Pet.findOne({ _id: objectId });
+        console.log('findOne with ObjectId result:', !!pet);
+      } catch (error) {
+        console.log('findOne with ObjectId error:', error.message);
+      }
+    }
+
+    // If still not found, try findOne with string
+    if (!pet) {
+      try {
+        pet = await Pet.findOne({ _id: id });
+        console.log('findOne with string result:', !!pet);
+      } catch (error) {
+        console.log('findOne with string error:', error.message);
+      }
+    }
+
+    console.log('Final pet found:', !!pet);
+
+    // If found, populate shelter info
     if (pet) {
       pet = await Pet.findById(id).populate('shelterId', 'name address phone email');
     }
