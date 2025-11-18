@@ -38,7 +38,7 @@ async function createAdminAccount() {
 async function seedShelters() {
   try {
     const count = await Shelter.countDocuments();
-    
+
     if (count === 0) {
       const shelters = [
         {
@@ -49,7 +49,7 @@ async function seedShelters() {
           email: 'contact@happypaws.in',
           capacity: 150,
           currentOccupancy: 87,
-          images: ['https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800']
+          images: ['/sh1.jpeg', '/sh2.jpeg', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800']
         },
         {
           name: 'Mumbai Animal Rescue',
@@ -59,7 +59,7 @@ async function seedShelters() {
           email: 'info@mumbaianimalrescue.in',
           capacity: 200,
           currentOccupancy: 142,
-          images: ['https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800']
+          images: ['/sh3.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800']
         },
         {
           name: 'Chennai Pet Sanctuary',
@@ -69,7 +69,7 @@ async function seedShelters() {
           email: 'care@chennaipetsanctuary.in',
           capacity: 120,
           currentOccupancy: 95,
-          images: ['https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800']
+          images: ['/sh5.jpeg', '/sh6.jpeg', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800']
         },
         {
           name: 'Delhi Stray Care',
@@ -79,7 +79,7 @@ async function seedShelters() {
           email: 'hello@delhistraycare.in',
           capacity: 180,
           currentOccupancy: 156,
-          images: ['https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=800']
+          images: ['/sh1.jpeg', '/sh3.jpeg', 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=800']
         },
         {
           name: 'Hyderabad Animal Haven',
@@ -89,14 +89,31 @@ async function seedShelters() {
           email: 'support@hydanimalhaven.in',
           capacity: 130,
           currentOccupancy: 98,
-          images: ['https://images.unsplash.com/photo-1522276498395-f4f68f7f8454?w=800']
+          images: ['/sh2.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1522276498395-f4f68f7f8454?w=800']
         }
       ];
 
       await Shelter.insertMany(shelters);
       return { success: true, message: `Seeded ${shelters.length} shelters` };
+    } else {
+      // Update existing shelters with new images
+      const shelterUpdates = [
+        { name: 'Happy Paws Bangalore', images: ['/sh1.jpeg', '/sh2.jpeg', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800'] },
+        { name: 'Mumbai Animal Rescue', images: ['/sh3.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800'] },
+        { name: 'Chennai Pet Sanctuary', images: ['/sh5.jpeg', '/sh6.jpeg', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800'] },
+        { name: 'Delhi Stray Care', images: ['/sh1.jpeg', '/sh3.jpeg', 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=800'] },
+        { name: 'Hyderabad Animal Haven', images: ['/sh2.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1522276498395-f4f68f7f8454?w=800'] }
+      ];
+
+      for (const update of shelterUpdates) {
+        await Shelter.findOneAndUpdate(
+          { name: update.name },
+          { $set: { images: update.images } }
+        );
+      }
+
+      return { success: true, message: 'Shelters already exist - updated with new images' };
     }
-    return { success: true, message: 'Shelters already exist' };
   } catch (error) {
     return { success: false, message: 'Error seeding shelters: ' + error.message };
   }
