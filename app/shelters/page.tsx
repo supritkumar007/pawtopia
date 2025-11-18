@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Search, MapPin, Users } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
@@ -8,72 +8,102 @@ import { GradientButton } from '@/components/ui/gradient-button'
 import { ShelterCard } from '@/components/ui/shelter-card'
 import { FormInput } from '@/components/ui/form-input'
 
+interface ShelterData {
+  _id: string
+  name: string
+  address: {
+    street: string
+    city: string
+    state: string
+    pincode: string
+  }
+  phone: string
+  email: string
+  capacity: number
+  currentOccupancy: number
+  images: string[]
+}
+
 export default function SheltersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLocation, setSelectedLocation] = useState('')
+  const [shelters, setShelters] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const shelters = [
-    {
-      id: '1',
-      name: 'Happy Paws Shelter',
-      location: 'San Francisco, CA',
-      phone: '+1 (555) 123-4567',
-      email: 'contact@happypaws.org',
-      petCount: 32,
-      image: '/placeholder.svg?key=2uq53',
-      rating: 4.8,
-    },
-    {
-      id: '2',
-      name: 'Furry Friends Rescue',
-      location: 'Oakland, CA',
-      phone: '+1 (555) 234-5678',
-      email: 'info@furryfriends.org',
-      petCount: 28,
-      image: '/placeholder.svg?key=4l0rb',
-      rating: 4.6,
-    },
-    {
-      id: '3',
-      name: 'Paws & Love Haven',
-      location: 'San Jose, CA',
-      phone: '+1 (555) 345-6789',
-      email: 'support@pawsandhaven.org',
-      petCount: 41,
-      image: '/placeholder.svg?key=o3rp0',
-      rating: 4.9,
-    },
-    {
-      id: '4',
-      name: 'Best Friends Animal Society',
-      location: 'Berkeley, CA',
-      phone: '+1 (555) 456-7890',
-      email: 'hello@bestfriends.org',
-      petCount: 35,
-      image: '/placeholder.svg?key=8k2q1',
-      rating: 4.7,
-    },
-    {
-      id: '5',
-      name: 'Second Chance Sanctuary',
-      location: 'Mountain View, CA',
-      phone: '+1 (555) 567-8901',
-      email: 'care@secondchance.org',
-      petCount: 22,
-      image: '/placeholder.svg?key=9l4r2',
-      rating: 4.5,
-    },
-    {
-      id: '6',
-      name: 'Animal Friends United',
-      location: 'Sunnyvale, CA',
-      phone: '+1 (555) 678-9012',
-      email: 'team@animalfriends.org',
-      petCount: 38,
-      image: '/placeholder.svg?key=5m8s3',
-      rating: 4.8,
-    },
-  ]
+  useEffect(() => {
+    const fetchShelters = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const response = await fetch('/api/shelters')
+        if (!response.ok) {
+          throw new Error('Failed to fetch shelters')
+        }
+
+        const result = await response.json()
+        if (result.success) {
+          // Transform API data to match component expectations
+          const transformedShelters = result.data.map((shelter: ShelterData) => ({
+            id: shelter._id,
+            name: shelter.name,
+            location: `${shelter.address.city}, ${shelter.address.state}`,
+            phone: shelter.phone,
+            email: shelter.email,
+            petCount: shelter.currentOccupancy,
+            image: shelter.images?.[0] || '/placeholder.svg',
+            rating: 4.8, // Default rating
+          }))
+
+          setShelters(transformedShelters)
+        } else {
+          throw new Error(result.message || 'Failed to fetch shelters')
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        console.error('Error fetching shelters:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchShelters()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-gradient-to-b from-[#FDFCFD] to-[#F9F7FF] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6D9EEB] mx-auto mb-4"></div>
+            <p className="text-[#6B7280]">Loading shelters...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-gradient-to-b from-[#FDFCFD] to-[#F9F7FF] flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-[#2A2D34] mb-4">Error Loading Shelters</h1>
+            <p className="text-[#6B7280] mb-6">{error}</p>
+            <GradientButton onClick={() => window.location.reload()}>
+              Try Again
+            </GradientButton>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
 
   const filteredShelters = shelters.filter(shelter => {
     const matchesSearch = shelter.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
