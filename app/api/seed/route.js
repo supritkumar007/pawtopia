@@ -5,6 +5,7 @@ import Pet from '@/lib/models/Pet';
 import Shelter from '@/lib/models/Shelter';
 import Blog from '@/lib/models/Blog';
 import LostFound from '@/lib/models/LostFound';
+import Adoption from '@/lib/models/Adoption';
 
 export const dynamic = 'force-dynamic';
 
@@ -261,6 +262,59 @@ async function seedLostFound() {
   }
 }
 
+// Seed adoptions
+async function seedAdoptions() {
+  try {
+    const count = await Adoption.countDocuments();
+
+    if (count === 0) {
+      // Find Simba cat
+      const simbaCat = await Pet.findOne({ name: 'Simba' });
+      if (!simbaCat) return { success: false, message: 'Simba cat not found for adoption seeding' };
+
+      // Find or create supritkumar user
+      let supritUser = await User.findOne({ email: 'supritkumar@example.com' });
+      if (!supritUser) {
+        supritUser = await User.create({
+          name: 'Suprit Kumar',
+          email: 'supritkumar@example.com',
+          phone: '9876543210',
+          password: 'Test@123', // This will be hashed by the pre-save hook
+          role: 'user',
+          location: {
+            city: 'Bangalore',
+            state: 'Karnataka'
+          }
+        });
+      }
+
+      const adoption = {
+        userId: supritUser._id,
+        petId: simbaCat._id,
+        questionnaire: {
+          experience: '2 years with cats',
+          homeType: 'Apartment',
+          familyMembers: '2 adults',
+          otherPets: 'No other pets',
+          workSchedule: '9-5 office job',
+          reason: 'Looking for a companion for my wife',
+          commitment: 'Fully committed for 15+ years',
+          allergies: 'No allergies in family',
+          exercise: 'Will provide daily playtime',
+          vet: 'Have a preferred vet nearby'
+        },
+        status: 'submitted'
+      };
+
+      await Adoption.create(adoption);
+      return { success: true, message: 'Seeded 1 adoption (Simba cat for Suprit Kumar)' };
+    }
+    return { success: true, message: 'Adoptions already exist' };
+  } catch (error) {
+    return { success: false, message: 'Error seeding adoptions: ' + error.message };
+  }
+}
+
 // Seed blogs
 async function seedBlogs() {
   try {
@@ -343,6 +397,7 @@ export async function GET() {
       shelters: await seedShelters(),
       pets: await seedPets(),
       lostFound: await seedLostFound(),
+      adoptions: await seedAdoptions(),
       blogs: await seedBlogs()
     };
 
