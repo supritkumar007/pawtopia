@@ -218,43 +218,60 @@ async function seedBlogs() {
           title: 'Top 10 Tips for New Pet Owners in India',
           content: 'Bringing a new pet home is exciting! Here are essential tips for Indian pet owners: 1) Proper vaccination schedule 2) Climate-appropriate diet 3) Regular vet checkups 4) Training and socialization...',
           author: admin._id, category: 'Tips', tags: ['pet care', 'new owners', 'india'],
-          images: ['https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800'],
+          images: ['/sh1.jpeg', '/sh2.jpeg', 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800'],
           published: true
         },
         {
           title: 'Understanding Pet Adoption Process',
           content: 'Adopting a pet is a wonderful decision! Learn about the adoption process, required documents, home visits, and what to expect when bringing your new companion home...',
           author: admin._id, category: 'General', tags: ['adoption', 'process', 'guide'],
-          images: ['https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800'],
+          images: ['/sh3.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800'],
           published: true
         },
         {
           title: 'Monsoon Pet Care Guide',
           content: 'The monsoon season requires special care for pets. Keep them dry, watch for infections, maintain hygiene, and ensure proper nutrition during humid months...',
           author: admin._id, category: 'Tips', tags: ['monsoon', 'seasonal care', 'health'],
-          images: ['https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800'],
+          images: ['/sh5.jpeg', '/sh6.jpeg', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800'],
           published: true
         },
         {
           title: 'Success Stories: Pets Who Found Their Forever Homes',
           content: 'Heartwarming stories of rescued pets who found loving families. Read about Raja, Simba, and many more who transformed from strays to beloved family members...',
           author: admin._id, category: 'Stories', tags: ['success', 'adoption stories', 'inspiration'],
-          images: ['https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800'],
+          images: ['/sh1.jpeg', '/sh3.jpeg', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800'],
           published: true
         },
         {
           title: 'Nutrition Guide for Indian Pets',
           content: 'Proper nutrition is key to pet health. Learn about suitable foods for Indian climate, homemade vs commercial food, portion control, and dietary requirements...',
           author: admin._id, category: 'Tips', tags: ['nutrition', 'diet', 'health'],
-          images: ['https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=800'],
+          images: ['/sh2.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=800'],
           published: true
         }
       ];
 
       await Blog.insertMany(blogs);
       return { success: true, message: `Seeded ${blogs.length} blogs` };
+    } else {
+      // Update existing blogs with new images
+      const blogUpdates = [
+        { title: 'Top 10 Tips for New Pet Owners in India', images: ['/sh1.jpeg', '/sh2.jpeg', 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=800'] },
+        { title: 'Understanding Pet Adoption Process', images: ['/sh3.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=800'] },
+        { title: 'Monsoon Pet Care Guide', images: ['/sh5.jpeg', '/sh6.jpeg', 'https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=800'] },
+        { title: 'Success Stories: Pets Who Found Their Forever Homes', images: ['/sh1.jpeg', '/sh3.jpeg', 'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800'] },
+        { title: 'Nutrition Guide for Indian Pets', images: ['/sh2.jpeg', '/sh4.jpeg', 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=800'] }
+      ];
+
+      for (const update of blogUpdates) {
+        await Blog.findOneAndUpdate(
+          { title: update.title },
+          { $set: { images: update.images } }
+        );
+      }
+
+      return { success: true, message: 'Blogs already exist - updated with new images' };
     }
-    return { success: true, message: 'Blogs already exist' };
   } catch (error) {
     return { success: false, message: 'Error seeding blogs: ' + error.message };
   }

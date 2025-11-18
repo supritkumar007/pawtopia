@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Calendar, User, ArrowRight, Search } from 'lucide-react'
@@ -8,52 +8,102 @@ import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { GradientButton } from '@/components/ui/gradient-button'
 
+interface BlogData {
+  _id: string
+  title: string
+  content: string
+  author: { name: string }
+  category: string
+  images: string[]
+  tags: string[]
+  published: boolean
+  createdAt: string
+}
+
 export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
+  const [articles, setArticles] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const articles = [
-    {
-      id: '1',
-      title: 'Preparing Your Home for a New Pet',
-      excerpt: 'Essential tips to prepare your home before bringing your new furry friend.',
-      category: 'adoption',
-      author: 'Sarah Johnson',
-      date: '2024-01-15',
-      image: '/placeholder.svg?key=2uq53',
-      readTime: '5 min read',
-    },
-    {
-      id: '2',
-      title: 'Understanding Pet Adoption Process',
-      excerpt: 'A comprehensive guide to navigating the adoption process at Pawtopia.',
-      category: 'adoption',
-      author: 'Michael Chen',
-      date: '2024-01-10',
-      image: '/placeholder.svg?key=4l0rb',
-      readTime: '7 min read',
-    },
-    {
-      id: '3',
-      title: 'Pet Health: 10 Essential Vaccinations',
-      excerpt: 'Learn about the vaccinations your pet needs for optimal health.',
-      category: 'health',
-      author: 'Dr. Emily Watson',
-      date: '2024-01-05',
-      image: '/placeholder.svg?key=o3rp0',
-      readTime: '6 min read',
-    },
-    {
-      id: '4',
-      title: 'Training Tips for New Pet Owners',
-      excerpt: 'Effective strategies to train your new pet and build a strong bond.',
-      category: 'training',
-      author: 'James Miller',
-      date: '2024-01-01',
-      image: '/placeholder.svg?key=8k2q1',
-      readTime: '8 min read',
-    },
-  ]
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const response = await fetch('/api/blogs')
+        if (!response.ok) {
+          throw new Error('Failed to fetch blogs')
+        }
+
+        const result = await response.json()
+        if (result.success) {
+          // Transform API data to match component expectations
+          const transformedArticles = result.data.map((blog: BlogData) => ({
+            id: blog._id,
+            title: blog.title,
+            excerpt: blog.content.substring(0, 150) + '...', // First 150 chars as excerpt
+            category: blog.category.toLowerCase(),
+            author: blog.author?.name || 'Anonymous',
+            date: new Date(blog.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            }),
+            image: blog.images?.[0] || '/placeholder.svg',
+            readTime: `${Math.ceil(blog.content.split(' ').length / 200)} min read`, // Estimate read time
+          }))
+
+          setArticles(transformedArticles)
+        } else {
+          throw new Error(result.message || 'Failed to fetch blogs')
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        console.error('Error fetching blogs:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchBlogs()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-gradient-to-b from-[#FDFCFD] to-[#F9F7FF] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6D9EEB] mx-auto mb-4"></div>
+            <p className="text-[#6B7280]">Loading blog articles...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-gradient-to-b from-[#FDFCFD] to-[#F9F7FF] flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-[#2A2D34] mb-4">Error Loading Blogs</h1>
+            <p className="text-[#6B7280] mb-6">{error}</p>
+            <GradientButton onClick={() => window.location.reload()}>
+              Try Again
+            </GradientButton>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
 
   const categories = ['all', 'adoption', 'health', 'training', 'stories']
 
