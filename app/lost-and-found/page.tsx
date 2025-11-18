@@ -1,70 +1,121 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { MapPin, Calendar, Heart, Share2, Phone, AlertCircle } from 'lucide-react'
 import { Navbar } from '@/components/layout/navbar'
 import { Footer } from '@/components/layout/footer'
 import { GradientButton } from '@/components/ui/gradient-button'
 
+interface LostFoundPost {
+  _id: string
+  type: 'lost' | 'found'
+  petName: string
+  description: string
+  lastSeenLocation: string
+  images: string[]
+  userId: { name: string; phone: string; email: string }
+  status: string
+  postedAt: string
+}
+
 export default function LostAndFoundPage() {
   const [activeTab, setActiveTab] = useState<'lost' | 'found'>('lost')
   const [showPostModal, setShowPostModal] = useState(false)
+  const [posts, setPosts] = useState<LostFoundPost[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const lostPets = [
-    {
-      id: '1',
-      name: 'Max',
-      breed: 'Golden Retriever',
-      lastSeen: 'Downtown Park',
-      date: '2024-01-12',
-      image: '/placeholder.svg?key=o3rp0',
-      description: 'Missing since Friday evening. Large golden retriever wearing a blue collar.',
-      contact: '+91 98765 43210',
-      reward: '₹25000',
-    },
-    {
-      id: '2',
-      name: 'Whiskers',
-      breed: 'White Persian Cat',
-      lastSeen: 'Residential Area',
-      date: '2024-01-10',
-      image: '/placeholder.svg?key=8k2q1',
-      description: 'Missing for 3 days. Long-haired white cat with blue eyes. Very shy.',
-      contact: '+91 87654 32109',
-      reward: '₹15000',
-    },
-    {
-      id: '3',
-      name: 'Charlie',
-      breed: 'Beagle Mix',
-      lastSeen: 'Neighborhood',
-      date: '2024-01-08',
-      image: '/placeholder.svg?key=9l4r2',
-      description: 'Brown and white beagle. Missing for a week. Please call if sighted.',
-      contact: '+91 76543 21098',
-      reward: '₹20000',
-    },
-  ]
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setIsLoading(true)
+        setError(null)
 
-  const foundPets = [
-    {
-      id: '101',
-      breed: 'German Shepherd',
-      foundLocation: 'Park Area',
-      date: '2024-01-11',
-      image: '/placeholder.svg?key=2uq53',
-      description: 'Found a large German Shepherd with collar on Main Street. Very friendly and well-trained.',
-    },
-    {
-      id: '102',
-      breed: 'Orange Tabby Cat',
-      foundLocation: 'Downtown',
-      date: '2024-01-09',
-      image: '/placeholder.svg?key=4l0rb',
-      description: 'Found an orange tabby cat near the shopping center. Has collar with bell.',
-    },
-  ]
+        const response = await fetch('/api/lostfound/all')
+        if (!response.ok) {
+          throw new Error('Failed to fetch lost and found posts')
+        }
+
+        const result = await response.json()
+        if (result.success) {
+          setPosts(result.data)
+        } else {
+          throw new Error(result.message || 'Failed to fetch posts')
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred')
+        console.error('Error fetching lost and found posts:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-gradient-to-b from-[#FDFCFD] to-[#F9F7FF] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6D9EEB] mx-auto mb-4"></div>
+            <p className="text-[#6B7280]">Loading lost and found posts...</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen bg-gradient-to-b from-[#FDFCFD] to-[#F9F7FF] flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-[#2A2D34] mb-4">Error Loading Posts</h1>
+            <p className="text-[#6B7280] mb-6">{error}</p>
+            <GradientButton onClick={() => window.location.reload()}>
+              Try Again
+            </GradientButton>
+          </div>
+        </main>
+        <Footer />
+      </>
+    )
+  }
+
+  const lostPets = posts.filter(post => post.type === 'lost').map(post => ({
+    id: post._id,
+    name: post.petName,
+    breed: 'Unknown Breed', // Model doesn't have breed field
+    lastSeen: post.lastSeenLocation,
+    date: new Date(post.postedAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    image: post.images?.[0] || '/placeholder.svg',
+    description: post.description,
+    contact: post.userId?.phone || 'Contact not available',
+    reward: 'Reward offered', // Model doesn't have reward field
+  }))
+
+  const foundPets = posts.filter(post => post.type === 'found').map(post => ({
+    id: post._id,
+    breed: 'Unknown Breed', // Model doesn't have breed field
+    foundLocation: post.lastSeenLocation,
+    date: new Date(post.postedAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    image: post.images?.[0] || '/placeholder.svg',
+    description: post.description,
+  }))
+
 
   const displayPets = activeTab === 'lost' ? lostPets : foundPets
 

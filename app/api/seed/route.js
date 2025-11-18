@@ -204,6 +204,63 @@ async function seedPets() {
   }
 }
 
+// Seed lost and found posts
+async function seedLostFound() {
+  try {
+    const count = await LostFound.countDocuments();
+
+    if (count === 0) {
+      const admin = await User.findOne({ role: 'admin' });
+      if (!admin) return { success: false, message: 'No admin found for lost/found seeding' };
+
+      const posts = [
+        {
+          type: 'lost',
+          petName: 'Max',
+          description: 'Missing since Friday evening. Large golden retriever wearing a blue collar. Very friendly and responds to his name.',
+          lastSeenLocation: 'Downtown Park, Bangalore',
+          images: ['/sh1.jpeg', '/sh2.jpeg'],
+          userId: admin._id,
+          status: 'active'
+        },
+        {
+          type: 'lost',
+          petName: 'Whiskers',
+          description: 'Missing for 3 days. Long-haired white cat with blue eyes. Very shy and hides when strangers approach.',
+          lastSeenLocation: 'Residential Area, Mumbai',
+          images: ['/sh3.jpeg', '/sh4.jpeg'],
+          userId: admin._id,
+          status: 'active'
+        },
+        {
+          type: 'found',
+          petName: 'Unknown',
+          description: 'Found a large German Shepherd with collar on Main Street. Very friendly and well-trained. No identification tags.',
+          lastSeenLocation: 'Park Area, Delhi',
+          images: ['/sh5.jpeg', '/sh6.jpeg'],
+          userId: admin._id,
+          status: 'active'
+        },
+        {
+          type: 'found',
+          petName: 'Unknown',
+          description: 'Found an orange tabby cat near the shopping center. Has collar with bell but no identification.',
+          lastSeenLocation: 'Downtown, Chennai',
+          images: ['/sh1.jpeg', '/sh3.jpeg'],
+          userId: admin._id,
+          status: 'active'
+        }
+      ];
+
+      await LostFound.insertMany(posts);
+      return { success: true, message: `Seeded ${posts.length} lost/found posts` };
+    }
+    return { success: true, message: 'Lost/Found posts already exist' };
+  } catch (error) {
+    return { success: false, message: 'Error seeding lost/found posts: ' + error.message };
+  }
+}
+
 // Seed blogs
 async function seedBlogs() {
   try {
@@ -285,6 +342,7 @@ export async function GET() {
       admin: await createAdminAccount(),
       shelters: await seedShelters(),
       pets: await seedPets(),
+      lostFound: await seedLostFound(),
       blogs: await seedBlogs()
     };
 
